@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090b10">
+  <title>TNICore | Hyperdrive Portal</title>
+  <meta name="description" content="TNICore technology access portal. Select a gateway to begin your journey.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap');
+    :root{--bg:#080a0f;--panel:#11151c;--silver:#c2c8d0;--muted:#78818d;--line:#313943;--blue:#64c7ff;--cyan:#a8e8ff;--amber:#e5a84d}
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050505;color:#edf2f7;font-family:Rajdhani,Arial,sans-serif}
+    #stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+    .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,rgba(5,5,5,0) 35%,rgba(5,5,5,.85) 100%)}
+    .shell{position:relative;z-index:2;height:100dvh;min-height:0;display:flex;flex-direction:column;align-items:center;padding:12px 20px 10px;overflow:hidden}
+    header{width:min(1160px,100%);height:54px;flex:0 0 54px;display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid #29313b;padding:0 2px}
+    .brand{height:100%;display:flex;align-items:center;gap:9px;font:700 19px Orbitron,sans-serif;letter-spacing:.2em;color:#f1f4f7}
+    .brand-logo{height:90px;width:auto;align-self:flex-start;flex:none;object-fit:contain}
+    .status{font:600 11px Orbitron,sans-serif;letter-spacing:.14em;color:#9ba8b5;display:flex;align-items:center;gap:9px}
+    .status i{width:7px;height:7px;border-radius:50%;background:#a8d6e8;box-shadow:0 0 12px #73cfff;display:inline-block}
+    .intro{text-align:center;margin:8px 0 0;flex:0 0 auto}
+    .eyebrow{font:600 10px Orbitron,sans-serif;letter-spacing:.32em;color:#8193a5}
+    h1{font:600 clamp(20px,3.5vw,34px) Orbitron,sans-serif;letter-spacing:.08em;margin:5px 0 3px}
+    .sub{color:#a4afbb;font-size:17px;letter-spacing:.08em;margin:0}
+    .stage{position:relative;width:min(760px,94vw,calc(100dvh - 210px));aspect-ratio:1/1;flex:0 1 auto;margin:0 auto;display:grid;place-items:center;isolation:isolate}
+    .stage:before,.stage:after{content:"";position:absolute;border:1px solid rgba(157,183,206,.13);border-radius:50%;inset:9%;box-shadow:0 0 50px rgba(53,139,198,.08),inset 0 0 45px rgba(61,139,197,.07);pointer-events:none}
+    .stage:after{inset:16%;border-style:dashed;opacity:.5;animation:slowSpin 90s linear infinite}
+    .portal-art{position:absolute;width:82%;height:82%;object-fit:contain;border-radius:50%;filter:drop-shadow(0 0 25px rgba(48,157,236,.2));z-index:1;transition:filter .5s}
+    .orbit{position:absolute;inset:4%;border:1px solid rgba(173,193,211,.18);border-radius:50%;z-index:2;pointer-events:none}
+    .orbit.inner{inset:23%;border-style:dotted;opacity:.42}
+    .orbit .tick{position:absolute;left:50%;top:-4px;width:2px;height:11px;background:#aab7c4;box-shadow:0 0 7px #b4e6ff;transform-origin:50% calc(var(--r, 1) * 1px)}
+    .node{--angle:0deg;position:absolute;left:50%;top:50%;width:clamp(82px,9vw,108px);height:clamp(82px,9vw,108px);transform:translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--radius)*-1)) rotate(calc(-1 * var(--angle)));border-radius:50%;border:1px solid #7c8996;background:radial-gradient(circle at 35% 27%,#667381 0,#29323d 28%,#10151d 66%,#05070b 100%);box-shadow:0 0 0 5px rgba(115,137,157,.07),inset 0 0 18px #000,0 8px 20px #000b;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:10px 7px;gap:3px;color:#edf4fa;cursor:pointer;z-index:5;transition:box-shadow .25s,border-color .25s,filter .25s}
+    .node b{line-height:1.35}
+    .node small{line-height:1.35;margin-top:4px}
+    .node:before{content:"";position:absolute;inset:7px;border-radius:50%;border:1px solid rgba(209,225,237,.3);pointer-events:none}
+    .node:after{content:"";position:absolute;width:9px;height:9px;top:8px;right:17px;border-radius:50%;background:var(--amber);box-shadow:0 0 11px var(--amber)}
+    .node:hover,.node:focus-visible{outline:none;border-color:#c4eaff;box-shadow:0 0 22px #5ebfff88,inset 0 0 18px #000;filter:brightness(1.25)}
+    .node .glyph{font-size:21px;line-height:1;color:#c7d5e1;text-shadow:0 0 12px #7bcfff}
+    .node b{font:600 9px Orbitron,sans-serif;letter-spacing:.08em;text-align:center}
+    .node small{font-size:10px;color:#aebbc7;letter-spacing:.06em}
+    .node[data-id="onboarding"]{--angle:0deg;--radius:150%}
+    .node[data-id="projects"]{--angle:90deg;--radius:150%}
+    .node[data-id="bicsi"]{--angle:180deg;--radius:150%}
+    .node[data-id="payment"]{--angle:270deg;--radius:150%}
+    .hub-label{position:absolute;bottom:7%;font:600 9px Orbitron,sans-serif;letter-spacing:.25em;color:#7f91a3;z-index:4}
+    .hint{margin:-4px 0 0;text-align:center;color:#8593a1;font-size:15px;letter-spacing:.07em;flex:0 0 auto}
+    .hint strong{color:#c9d5df;font-weight:600}
+    .bottom{width:min(1160px,100%);height:30px;flex:0 0 30px;margin-top:auto;padding-top:7px;display:flex;justify-content:space-between;gap:15px;border-top:1px solid #29313b;color:#687582;font:10px Orbitron,sans-serif;letter-spacing:.12em}
+    .bottom span:last-child{text-align:right}
+    .console{position:fixed;z-index:20;inset:0;background:rgba(3,5,9,.82);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:20px}
+    .console.show{display:flex}
+    .console-card{width:min(520px,100%);background:linear-gradient(145deg,#1b232d,#0b0f15);border:1px solid #667482;border-radius:14px;padding:26px;box-shadow:0 25px 90px #000,0 0 40px #56baff20;position:relative}
+    .console-card h2{font:600 19px Orbitron,sans-serif;letter-spacing:.08em;margin:0 0 7px}
+    .console-card p{color:#aab6c1;font-size:16px;margin:0 0 18px}
+    .links{display:grid;gap:9px}
+    .link{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border:1px solid #3a4652;border-radius:7px;color:#e5edf4;text-decoration:none;background:#101720;transition:.2s}
+    .link:hover{border-color:#8ccfff;background:#182533}
+    .link small{color:#8594a3}
+    .close{position:absolute;right:15px;top:12px;background:none;border:0;color:#9eabb7;font-size:24px;cursor:pointer}
+    .wormhole{position:fixed;z-index:50;inset:0;display:none;place-items:center;background:#02050a;overflow:hidden}
+    .wormhole.active{display:grid;animation:flash .7s ease}
+    .warp-core{width:30vmin;height:30vmin;border-radius:50%;background:radial-gradient(circle,#fff 0,#a5eaff 5%,#2d8ed2 20%,#071a35 48%,transparent 70%);box-shadow:0 0 45px #4bbcff,0 0 140px #147bc7;animation:warp .85s ease-in-out infinite alternate}
+    .warp-ring{position:absolute;width:30vmin;height:30vmin;border:5px solid #c8eaff;border-radius:50%;box-shadow:0 0 28px #64c7ff,inset 0 0 28px #64c7ff;animation:expand 1.2s ease-out forwards}
+    .warp-text{position:absolute;bottom:16%;font:600 12px Orbitron,sans-serif;letter-spacing:.28em;color:#d9f3ff;text-align:center;text-shadow:0 0 14px #3dafff}
+    .stage.dialing .portal-art{filter:drop-shadow(0 0 38px #5bc6ff) brightness(1.3)}
+    .stage.dialing .orbit{animation:slowSpin .7s linear infinite}
+    .stage.dialing .node{pointer-events:none;filter:brightness(1.5)}
+
+
+
+    @keyframes slowSpin{to{transform:rotate(360deg)}}
+    @keyframes warp{to{transform:scale(1.4);filter:brightness(1.7)}}
+    @keyframes expand{to{transform:scale(8);opacity:0}}
+    @keyframes flash{0%{background:#d9f5ff}100%{background:#02050a}}
+    @media(max-width:560px){
+      .shell{padding:6px 10px 5px}
+      header{height:46px;flex-basis:46px}
+      .brand-logo{height:58px}
+      .brand-name{font-size:15px}
+      .status{font-size:8px;letter-spacing:.08em}
+      .intro{margin:4px 0 0}
+      .eyebrow{font-size:8px}
+      h1{font-size:20px;margin:3px 0 2px}
+      .sub{font-size:12px}
+      .stage{width:min(100vw - 20px,calc(100dvh - 155px));margin:0 auto}
+      .portal-art{width:82%;height:82%}
+      .node{width:76px;height:76px;padding:8px 5px;gap:2px}
+      .node .glyph{font-size:16px}.node b{font-size:7px;line-height:1.25}.node small{font-size:8px;line-height:1.25;margin-top:1px}
+      .node[data-id="onboarding"],.node[data-id="projects"],.node[data-id="bicsi"],.node[data-id="payment"]{--radius:125%}
+      .hub-label{font-size:7px;bottom:5%}
+      .hint{font-size:11px}
+      .bottom{height:24px;flex-basis:24px;font-size:7px;padding-top:5px}
+    }
+    @media(max-height:620px){
+      header{height:42px;flex-basis:42px}
+      .brand-logo{height:48px}
+      .intro{margin:2px 0 0}
+      .eyebrow{font-size:8px}
+      h1{font-size:17px;margin:2px 0}
+      .sub{font-size:11px}
+      .hint{font-size:10px}
+      .bottom{display:none}
+      .stage{width:min(94vw,calc(100dvh - 118px))}
+    }
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="vignette"></div>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <img class="brand-logo" src="icon-logo.png" alt="TNICore logo">
+      <span class="brand-name">TNI<span>CORE</span></span>
+    </div>
+    <div class="status">
+      <i></i> SYSTEM ONLINE&nbsp; / &nbsp;GATEWAY 01</div>
+    </header>
+  <section class="intro">
+    <div class="eyebrow">TECHNOLOGY NETWORK ACCESS</div>
+    <h1>HYPERDRIVE PORTAL</h1>
+    <p class="sub">Select your destination. Initiate sequence.</p>
+  </section>
+  <main class="stage" id="stage" aria-label="TNICore interactive portal">
+    <div class="orbit"></div>
+    <div class="orbit inner"></div>
+       <img class="portal-art" src="tnicore-portal.png" alt="TNICore mechanical energy portal">
+         <button class="node" data-id="onboarding" aria-label="Open Onboarding">
+          <span class="glyph">⌘</span>
+          <b>ONBOARDING</b><small>ACCESS</small>
+        </button>
+         <button class="node" data-id="projects" aria-label="Open Projects">
+          <span class="glyph">▦</span>
+          <b>PROJECTS</b>
+          <small>SHAREPOINT</small>
+        </button>
+         <button class="node" data-id="bicsi" aria-label="Open BICSI">
+          <span class="glyph">◈</span>
+          <b>BICSI</b><small>TRAINING</small>
+        </button>
+         <button class="node" data-id="payment" aria-label="Open Payment Portal">
+          <span class="glyph">₿</span>
+          <b>PAYMENT</b><small>PORTAL</small>
+        </button>
+    <div class="hub-label">TNICORE • SECURE ACCESS GRID</div>
+  </main>
+  <p class="hint"><strong>Choose a glowing globe</strong> to dial your destination</p>
+  <footer class="bottom">
+    <span>TNICORE.COM</span>
+    <span>SECURE CONNECTION • INTERACTIVE PROTOTYPE</span>
+  </footer>
+</div>
+
+<section class="console" id="console" role="dialog" aria-modal="true" aria-labelledby="consoleTitle">
+  <div class="console-card">
+    <button class="close" id="close" aria-label="Close">&times;</button>
+    <h2 id="consoleTitle">DESTINATION LOCKED</h2>
+    <p id="consoleDesc">Choose a route to continue.</p>
+    <div class="links" id="links">
+
+    </div>
+  </div>
+</section>
+<div class="wormhole" id="wormhole">
+  <div class="warp-core"></div>
+  <div class="warp-ring"></div>
+  <div class="warp-text" id="warpText">HYPERDRIVE ENGAGED<br><br>TRAVERSING WORMHOLE</div>
+</div>
+
+<script>
+  // Replace the placeholder URLs below with your production destinations.
+  const ROUTES = {
+    onboarding: [
+      {label:"Fill out onboarding form", detail:"Customer / Client / Technician onboarding", url:""},
+      {label:"TNICore Web Email", detail:"Roundcube webmail — customized skin", url:""}
+    ],
+    projects: [
+      {label:"Open Projects • SharePoint", detail:"Sign-in credentials required", url:""}
+    ],
+    bicsi: [
+      {label:"BICSI Training", detail:"Training resources", url:""},
+      {label:"Certified Staff • RCDD", detail:"Certification level directory — XXX", url:""},
+      {label:"Certified Staff • Technician", detail:"Certification level directory — XXX", url:""}
+    ],
+    payment: [
+      {label:"Open Payment Portal", detail:"Secure payment access", url:""}
+    ]
+  };
+  const TITLES = {onboarding:"ONBOARDING GATEWAY",projects:"PROJECTS GATEWAY",bicsi:"BICSI KNOWLEDGE GATE",payment:"PAYMENT GATEWAY"};
+  const DESCRIPTIONS = {onboarding:"Start your TNICore journey or access your company web email.",projects:"Access project workspaces. SharePoint authentication may be required.",bicsi:"Explore training and certified staff by certification level.",payment:"Continue to the secure payment destination."};
+  const stage = document.getElementById("stage");
+  const wormhole = document.getElementById("wormhole");
+  const consoleBox = document.getElementById("console");
+  const linksBox = document.getElementById("links");
+  let busy = false;
+  const starCanvas = document.getElementById("stars");
+  const starContext = starCanvas.getContext("2d");
+  let starWidth, starHeight, starSpeed = 0.05;
+  const stars = Array.from({length:450},()=>({x:Math.random()*2-1,y:Math.random()*2-1,z:Math.random()}));
+  function resizeStars(){
+    const pixelRatio = window.devicePixelRatio || 1;
+    starWidth = starCanvas.width = window.innerWidth * pixelRatio;
+    starHeight = starCanvas.height = window.innerHeight * pixelRatio;
+  }
+  window.addEventListener("resize",resizeStars);
+  resizeStars();
+  let lastFrame = performance.now();
+  function animateStars(now){
+    const delta = Math.min((now-lastFrame)/1000,.05);
+    lastFrame = now;
+    starContext.fillStyle = `rgba(5,5,5,${starSpeed > 1 ? 0.35 : 0.9})`;
+    starContext.fillRect(0,0,starWidth,starHeight);
+    const focalLength = Math.max(starWidth,starHeight)*.5;
+    for(const star of stars){
+      const previousZ = star.z;
+      star.z -= starSpeed*delta;
+      if(star.z<=.02){
+        star.x = Math.random()*2-1;
+        star.y = Math.random()*2-1;
+        star.z = 1;
+        continue;
+      }
+      const startX = starWidth/2+star.x/previousZ*focalLength*.5;
+      const startY = starHeight/2+star.y/previousZ*focalLength*.5;
+      const endX = starWidth/2+star.x/star.z*focalLength*.5;
+      const endY = starHeight/2+star.y/star.z*focalLength*.5;
+      const alpha = Math.min(1,(1-star.z)*1.4+.1);
+      const shade = 150+105*(1-star.z)|0;
+      starContext.strokeStyle = `rgba(${shade},${shade},${shade},${alpha})`;
+      starContext.lineWidth = (1-star.z)*1.6+.4;
+      starContext.beginPath();
+      starContext.moveTo(startX,startY);
+      starContext.lineTo(endX,endY);
+      starContext.stroke();
+    }
+    requestAnimationFrame(animateStars);
+  }
+  requestAnimationFrame(animateStars);
+  document.querySelectorAll(".node").forEach((node,index)=>{
+    node.addEventListener("click",()=>{
+      if(busy) return;
+      busy = true;
+      const id = node.dataset.id;
+      const spin = 2 + Math.random()*2.5 + index*.18;
+      stage.classList.add("dialing");
+      // Each globe receives its own randomized dial duration and rotation direction.
+      const direction = Math.random() > .5 ? 1 : -1;
+      stage.style.setProperty("--dial-direction", direction);
+      document.querySelectorAll(".orbit").forEach((ring,i)=>{
+        ring.style.animationDuration = (0.45 + Math.random()*.4) + "s";
+        ring.style.animationDirection = direction > 0 ? "normal" : "reverse";
+      });
+      node.animate([{transform:getComputedStyle(node).transform},{transform:`translate(-50%,-50%) rotate(${direction*1080}deg) translateY(-37%) rotate(${-direction*1080}deg)`}],{duration:spin*650,easing:"cubic-bezier(.12,.7,.1,1)"});
+      setTimeout(()=>{
+        stage.classList.remove("dialing");
+        wormhole.classList.add("active");
+        document.getElementById("warpText").innerHTML = `COORDINATES LOCKED<br><br>${TITLES[id]}<br><br>HYPERDRIVE ENGAGED`;
+        setTimeout(()=>{
+          wormhole.classList.remove("active");
+          showDestination(id);
+          busy = false;
+        },1450);
+      },spin*650);
+    });
+  });
+  function showDestination(id){
+    document.getElementById("consoleTitle").textContent = TITLES[id];
+    document.getElementById("consoleDesc").textContent = DESCRIPTIONS[id];
+    linksBox.innerHTML = "";
+    ROUTES[id].forEach(route=>{
+      const a = document.createElement("a");
+      a.className = "link";
+      a.href = route.url || "#";
+      a.innerHTML = `<span>${route.label}<br><small>${route.detail}</small></span><span>↗</span>`;
+      if(!route.url){
+        a.addEventListener("click",e=>{e.preventDefault();alert("Destination belum dikonfigurasi. Tambahkan URL pada objek ROUTES di file index.html.");});
+      } else {
+        a.target = "_blank"; a.rel = "noopener noreferrer";
+      }
+      linksBox.appendChild(a);
+    });
+    consoleBox.classList.add("show");
+  }
+  document.getElementById("close").addEventListener("click",()=>consoleBox.classList.remove("show"));
+  consoleBox.addEventListener("click",e=>{if(e.target===consoleBox)consoleBox.classList.remove("show")});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")consoleBox.classList.remove("show")});
+</script>
+</body>
+</html>
